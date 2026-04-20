@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lolos.online Logo Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { 
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; 
+    background: #f8f8f6; 
+    min-height: 100vh; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 24px; 
+    padding: 40px 20px; 
+  }
+  h1 { font-size: 14px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #5BA882; }
+  .preview-box { 
+    background: #ffffff; 
+    border-radius: 32px; 
+    width: 100%; 
+    max-width: 500px; 
+    height: 300px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    box-shadow: 0 10px 40px rgba(0,0,0,0.05); 
+    transition: all 0.3s ease; 
+    overflow: hidden;
+    position: relative;
+  }
+  .preview-box.square {
+    height: 500px;
+  }
+  .preview-box svg { width: 90%; height: auto; z-index: 2; }
+  
+  /* Checkerboard for transparent preview hint */
+  .preview-box.is-transparent::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    opacity: 0.5;
+    z-index: 1;
+  }
+
+  .controls { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 16px; 
+    width: 100%; 
+    max-width: 500px; 
+    background: white; 
+    border-radius: 24px; 
+    padding: 24px; 
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
+  }
+  .control-row { display: flex; align-items: center; justify-content: space-between; }
+  label { font-size: 13px; font-weight: 600; color: #1A1A1A; }
+  
+  .format-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f0f0f0; padding: 4px; border-radius: 10px; }
+  .format-btn { border: none; padding: 8px; border-radius: 7px; font-size: 12px; font-weight: 700; cursor: pointer; background: transparent; color: #666; transition: all 0.2s; }
+  .format-btn.active { background: #ffffff; color: #1A1A1A; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+  input[type="color"] { width: 44px; height: 32px; border: none; border-radius: 6px; cursor: pointer; padding: 2px; background: #f0f0f0; }
+  
+  .checkbox-row { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .checkbox-row input { cursor: pointer; width: 16px; height: 16px; accent-color: #5BA882; }
+
+  .presets { display: flex; gap: 8px; flex-wrap: wrap; }
+  .preset { width: 32px; height: 32px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+  .preset:hover { transform: scale(1.1); }
+  
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+  .download-btn { 
+    background: #5BA882; 
+    color: white; 
+    border: none; 
+    border-radius: 10px; 
+    padding: 14px; 
+    font-size: 13px; 
+    font-weight: 700; 
+    cursor: pointer; 
+    transition: background 0.2s; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .download-btn.secondary { background: #1A1A1A; }
+  .download-btn:hover { opacity: 0.9; }
+  .divider { height: 1px; background: #f0f0f0; }
+</style>
+</head>
+<body>
+
+<h1>Lolos.online — Logo Preview</h1>
+
+<div class="preview-box" id="previewBox">
+  <svg id="logoSvg" viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg">
+    <text x="500" y="150" dominant-baseline="middle" text-anchor="middle" 
+          style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 200px; letter-spacing: -8px;" 
+          id="mainText">lolos<tspan id="dotText" style="fill: #5BA882;">.</tspan></text>
+  </svg>
+</div>
+
+<div class="controls">
+  <div>
+    <label style="display:block;margin-bottom:8px">Format Logo</label>
+    <div class="format-tabs">
+      <button class="format-btn active" id="btnLandscape" onclick="setFormat('landscape')">Landscape (Wide)</button>
+      <button class="format-btn" id="btnSquare" onclick="setFormat('square')">Square (1:1)</button>
+    </div>
+  </div>
+
+  <div class="control-row">
+    <label>Warna Teks</label>
+    <input type="color" id="textColor" value="#1A1A1A">
+  </div>
+  <div class="control-row">
+    <label>Warna Titik</label>
+    <input type="color" id="dotColor" value="#5BA882">
+  </div>
+  <div class="control-row">
+    <label>Warna Background</label>
+    <input type="color" id="bgColor" value="#ffffff">
+  </div>
+
+  <label class="checkbox-row">
+    <input type="checkbox" id="transparentToggle">
+    <span>Download Background Transparan</span>
+  </label>
+
+  <div class="divider"></div>
+  
+  <div>
+    <label style="display:block;margin-bottom:10px">Palette Brand</label>
+    <div class="presets" id="presets"></div>
+  </div>
+
+  <div class="divider"></div>
+  
+  <div class="actions">
+    <button class="download-btn" onclick="downloadSVG()">⬇ SVG</button>
+    <button class="download-btn secondary" onclick="downloadPNG()">🖼 PNG (High Res)</button>
+  </div>
+</div>
+
+<canvas id="exportCanvas" style="display:none"></canvas>
+
+<script>
+  let currentFormat = 'landscape';
+
+  const presets = [
+    { text: '#1A1A1A', dot: '#5BA882', bg: '#ffffff', label: 'Light' },
+    { text: '#ffffff', dot: '#5BA882', bg: '#1A3C34', label: 'Medvi Dark' },
+    { text: '#ffffff', dot: '#A4D4BE', bg: '#1A3C34', label: 'Hero Style' },
+    { text: '#5BA882', dot: '#1A1A1A', bg: '#FAFAF8', label: 'Sage' }
+  ];
+
+  const presetsContainer = document.getElementById('presets');
+  presets.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'preset';
+    div.style.background = p.dot;
+    div.style.border = `3px solid ${p.text}`;
+    div.title = p.label;
+    div.onclick = () => {
+      document.getElementById('textColor').value = p.text;
+      document.getElementById('dotColor').value = p.dot;
+      document.getElementById('bgColor').value = p.bg;
+      document.getElementById('transparentToggle').checked = false;
+      applyColors();
+    };
+    presetsContainer.appendChild(div);
+  });
+
+  function setFormat(format) {
+    currentFormat = format;
+    const box = document.getElementById('previewBox');
+    const svg = document.getElementById('logoSvg');
+    const text = document.getElementById('mainText');
+    
+    document.getElementById('btnLandscape').classList.toggle('active', format === 'landscape');
+    document.getElementById('btnSquare').classList.toggle('active', format === 'square');
+    box.classList.toggle('square', format === 'square');
+
+    if (format === 'square') {
+      svg.setAttribute('viewBox', '0 0 1000 1000');
+      text.setAttribute('y', '500');
+    } else {
+      svg.setAttribute('viewBox', '0 0 1000 300');
+      text.setAttribute('y', '150');
+    }
+  }
+
+  function applyColors() {
+    const text = document.getElementById('textColor').value;
+    const dot = document.getElementById('dotColor').value;
+    const bg = document.getElementById('bgColor').value;
+    const isTransparent = document.getElementById('transparentToggle').checked;
+    
+    document.getElementById('mainText').style.fill = text;
+    document.getElementById('dotText').style.fill = dot;
+    
+    const box = document.getElementById('previewBox');
+    box.style.background = isTransparent ? 'transparent' : bg;
+    box.classList.toggle('is-transparent', isTransparent);
+  }
+
+  document.getElementById('textColor').addEventListener('input', applyColors);
+  document.getElementById('dotColor').addEventListener('input', applyColors);
+  document.getElementById('bgColor').addEventListener('input', applyColors);
+  document.getElementById('transparentToggle').addEventListener('change', applyColors);
+
+  function getFinalSVGContent() {
+    const text = document.getElementById('textColor').value;
+    const dot = document.getElementById('dotColor').value;
+    const bg = document.getElementById('bgColor').value;
+    const isTransparent = document.getElementById('transparentToggle').checked;
+    
+    const width = currentFormat === 'square' ? 1000 : 2000;
+    const height = currentFormat === 'square' ? 1000 : 600;
+    const viewBox = currentFormat === 'square' ? '0 0 1000 1000' : '0 0 1000 300';
+    const textY = currentFormat === 'square' ? 500 : 150;
+    
+    // Background rectangle - only add if NOT transparent
+    const bgRect = isTransparent ? '' : `<rect width="1000" height="${currentFormat === 'square' ? '1000' : '300'}" fill="${bg}"/>`;
+
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="${width}" height="${height}" viewBox="${viewBox}" xmlns="http://www.w3.org/2000/svg">
+  ${bgRect}
+  <text x="500" y="${textY}" dominant-baseline="middle" text-anchor="middle" 
+        style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 200px; letter-spacing: -8px; fill: ${text};">lolos<tspan style="fill: ${dot};">.</tspan></text>
+</svg>`;
+  }
+
+  function downloadSVG() {
+    const content = getFinalSVGContent();
+    const blob = new Blob([content], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `lolos_online_logo_${currentFormat}${document.getElementById('transparentToggle').checked ? '_trans' : ''}.svg`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadPNG() {
+    const canvas = document.getElementById('exportCanvas');
+    const ctx = canvas.getContext('2d');
+    const svgContent = getFinalSVGContent();
+    const isTransparent = document.getElementById('transparentToggle').checked;
+    const bg = document.getElementById('bgColor').value;
+    
+    const img = new Image();
+    const svgBlob = new Blob([svgContent], {type: 'image/svg+xml;charset=utf-8'});
+    const url = URL.createObjectURL(svgBlob);
+
+    img.onload = function() {
+      canvas.width = currentFormat === 'square' ? 1000 : 2000;
+      canvas.height = currentFormat === 'square' ? 1000 : 600;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // If not transparent, manually fill canvas background first for PNG
+      if (!isTransparent) {
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+      
+      ctx.drawImage(img, 0, 0);
+      
+      const pngUrl = canvas.toDataURL("image/png");
+      const a = document.createElement('a');
+      a.href = pngUrl;
+      a.download = `lolos_online_logo_${currentFormat}${isTransparent ? '_trans' : ''}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  }
+</script>
+</body>
+</html>

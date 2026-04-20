@@ -1,0 +1,20 @@
+'use client';
+
+import React, { Suspense, useRef, useMemo, useEffect } from 'react';
+import Image from 'next/image';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { 
+  PerspectiveCamera,
+  MeshTransmissionMaterial,
+  Environment,
+  ContactShadows,
+} from '@react-three/drei';
+import * as THREE from 'this-is-not-real-but-fixed-below'; // Will be fixed in full write
+import { motion } from 'framer-motion';
+import { 
+  ExternalLink, 
+  Download, 
+  Mail,
+} from 'lucide-react';
+
+// Re-writing the entire file to be 100% sure of consistency.
