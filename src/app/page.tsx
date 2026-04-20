@@ -70,12 +70,13 @@ function PointerManager() {
   return null;
 }
 
-// --- Optimized Architectural Sphere ---
+// --- High-End Architectural Sphere ---
 function ArchitecturalSphere() {
   const meshRef = useRef<THREE.Mesh>(null);
   const { viewport } = useThree();
   
-  const sphereGeo = useMemo(() => new THREE.IcosahedronGeometry(1, 3), []);
+  // Back to a slightly higher detail for better light refraction
+  const sphereGeo = useMemo(() => new THREE.IcosahedronGeometry(1, 4), []);
 
   useFrame((state) => {
     if (meshRef.current) {
@@ -91,27 +92,28 @@ function ArchitecturalSphere() {
       meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, targetX, 0.1);
       meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY, 0.1);
 
-      meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, (mouse.x * 1.5) + t * 0.1, 0.08);
-      meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, -mouse.y * 1.5, 0.08);
+      meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, (mouse.x * 2) + t * 0.15, 0.08);
+      meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, -mouse.y * 2, 0.08);
     }
   });
 
   return (
-    <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
+    <Float speed={2} rotationIntensity={1} floatIntensity={1}>
       <mesh ref={meshRef} geometry={sphereGeo}>
         <MeshTransmissionMaterial 
-          resolution={512}
-          samples={4}
-          thickness={1.0} 
-          chromaticAberration={0.02} 
-          anisotropy={0.1} 
-          distortion={0}
-          color="#00f2ff" // NEON CYAN - Pure and vibrant
+          backside
+          samples={8}
+          resolution={1024}
+          thickness={2.0} 
+          chromaticAberration={0.1} 
+          anisotropy={0.5} 
+          distortion={0.1}
+          color="#00e5ff" // Deep Electric Cyan
           transmission={1} 
           roughness={0} 
-          ior={1.2}
-          emissive="#00f2ff"
-          emissiveIntensity={0.5} // HIGH GLOW - Prevents any grey look
+          ior={1.3}
+          emissive="#00b0ff"
+          emissiveIntensity={1.5} // High emissive to kill the greyness
         />
       </mesh>
     </Float>
@@ -173,21 +175,21 @@ export default function BlendedPortfolio() {
       
       {/* 3D Background */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <Canvas dpr={[1, 1.5]} performance={{ min: 0.5 }} gl={{ antialias: false, powerPreference: "high-performance" }}>
+        <Canvas dpr={[1, 2]} performance={{ min: 0.5 }}>
           <PointerManager />
           <AdaptiveDpr pixelated />
           <AdaptiveEvents />
           <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={45} />
-          <ambientLight intensity={2.5} />
-          <pointLight position={[10, 10, 10]} intensity={15} color="#ffffff" />
-          <spotLight position={[-15, 20, 15]} angle={0.4} penumbra={1} intensity={25} color="#00f2ff" />
-          <spotLight position={[20, -15, 10]} angle={0.4} penumbra={1} intensity={20} color="#0ea5e9" />
+          <ambientLight intensity={3.0} />
+          <pointLight position={[10, 10, 10]} intensity={20} color="#ffffff" />
+          <spotLight position={[-15, 20, 15]} angle={0.5} penumbra={1} intensity={30} color="#00e5ff" />
+          <spotLight position={[20, -15, 10]} angle={0.5} penumbra={1} intensity={25} color="#ff00ea" />
           <Suspense fallback={null}>
             <group scale={3.5}>
               <ArchitecturalSphere />
             </group>
-            <Environment preset="city" />
-            <ContactShadows position={[0, -5, 0]} opacity={0.05} scale={20} blur={6} far={10} resolution={256} />
+            <Environment preset="studio" />
+            <ContactShadows position={[0, -5, 0]} opacity={0.1} scale={20} blur={6} far={10} />
           </Suspense>
         </Canvas>
       </div>
