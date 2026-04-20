@@ -104,16 +104,16 @@ function ArchitecturalSphere() {
           backside
           samples={6}
           resolution={512}
-          thickness={1.5} 
+          thickness={1.2} 
           chromaticAberration={0.05} 
           anisotropy={0.2} 
           distortion={0}
-          color="#001a3d" // DEEP DARK BLUE - Looks black but reflects blue
+          color="#0033ff" // BRIGHTER DEEP BLUE
           transmission={1} 
           roughness={0} 
           ior={1.2}
-          emissive="#000d1a"
-          emissiveIntensity={0.2}
+          emissive="#0022ff"
+          emissiveIntensity={0.5} // INCREASED GLOW
         />
       </mesh>
     </Float>
@@ -180,10 +180,10 @@ export default function BlendedPortfolio() {
           <AdaptiveDpr pixelated />
           <AdaptiveEvents />
           <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={45} />
-          <ambientLight intensity={1.0} />
-          <pointLight position={[10, 10, 10]} intensity={15} color="#ffffff" />
-          <spotLight position={[-15, 20, 15]} angle={0.5} penumbra={1} intensity={20} color="#001a3d" />
-          <spotLight position={[20, -15, 10]} angle={0.5} penumbra={1} intensity={15} color="#ffffff" />
+          <ambientLight intensity={1.5} />
+          <pointLight position={[10, 10, 10]} intensity={20} color="#ffffff" />
+          <spotLight position={[-15, 20, 15]} angle={0.5} penumbra={1} intensity={30} color="#0033ff" />
+          <spotLight position={[20, -15, 10]} angle={0.5} penumbra={1} intensity={25} color="#ffffff" />
           <Suspense fallback={null}>
             <group scale={3.5}>
               <ArchitecturalSphere />
