@@ -9,6 +9,8 @@ import {
   Environment,
   ContactShadows,
   AdaptiveDpr,
+  AdaptiveEvents,
+  Float,
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
@@ -52,67 +54,69 @@ function PointerManager() {
   const { mouse } = useThree();
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const handleMouseMove = (e: any) => {
+    const handleMove = (e: any) => {
       const x = e.touches ? e.touches[0].clientX : e.clientX;
       const y = e.touches ? e.touches[0].clientY : e.clientY;
       mouse.x = (x / window.innerWidth) * 2 - 1;
       mouse.y = -(y / window.innerHeight) * 2 + 1;
     };
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('touchmove', handleMouseMove, { passive: true });
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('touchmove', handleMove, { passive: true });
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('touchmove', handleMouseMove);
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('touchmove', handleMove);
     };
   }, [mouse]);
   return null;
 }
 
-// --- RESTORED Original Architectural Sphere ---
+// --- Deep Midnight Architectural Sphere ---
 function ArchitecturalSphere() {
   const meshRef = useRef<THREE.Mesh>(null);
   const { viewport } = useThree();
   
-  const sphereGeo = useMemo(() => new THREE.IcosahedronGeometry(1, 15), []);
+  // Optimized detail 4 for performance while maintaining roundness
+  const sphereGeo = useMemo(() => new THREE.IcosahedronGeometry(1, 4), []);
 
   useFrame((state) => {
     if (meshRef.current) {
-      const t = state.clock.getElapsedTime();
+      const { mouse, clock } = state;
+      const t = clock.getElapsedTime();
       
-      const targetRotationX = state.mouse.y * 0.8;
-      const targetRotationY = state.mouse.x * 0.8;
-      
-      meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, targetRotationY + t * 0.1, 0.05);
-      meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, -targetRotationX, 0.05);
-      
-      const margin = 0.5;
-      const limitX = (viewport.width / 2) / 3.5 + margin;
-      const limitY = (viewport.height / 2) / 3.5 + margin;
+      const limitX = Math.max(0, (viewport.width / 7) - 1.1);
+      const limitY = Math.max(0, (viewport.height / 7) - 1.1);
 
-      const targetX = THREE.MathUtils.clamp(state.mouse.x * 6, -limitX, limitX);
-      const targetY = THREE.MathUtils.clamp(state.mouse.y * 4, -limitY, limitY);
+      const targetX = mouse.x * limitX;
+      const targetY = mouse.y * limitY;
       
-      meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, targetX, 0.08);
-      meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY, 0.08);
+      meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, targetX, 0.1);
+      meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY, 0.1);
+
+      meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, (mouse.x * 2) + t * 0.15, 0.08);
+      meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, -mouse.y * 2, 0.08);
     }
   });
 
   return (
-    <group>
+    <Float speed={2} rotationIntensity={1} floatIntensity={0.5}>
       <mesh ref={meshRef} geometry={sphereGeo}>
         <MeshTransmissionMaterial 
-          backside 
-          samples={16} 
+          backside
+          samples={6}
+          resolution={512}
           thickness={1.5} 
-          chromaticAberration={0.1} 
-          anisotropy={0.3} 
-          color="#0ea5e9"
+          chromaticAberration={0.05} 
+          anisotropy={0.2} 
+          distortion={0}
+          color="#001a3d" // DEEP DARK BLUE - Looks black but reflects blue
           transmission={1} 
           roughness={0} 
           ior={1.2}
+          emissive="#000d1a"
+          emissiveIntensity={0.2}
         />
       </mesh>
-    </group>
+    </Float>
   );
 }
 
@@ -169,21 +173,23 @@ export default function BlendedPortfolio() {
   return (
     <main className="relative min-h-screen w-full bg-white font-sans selection:bg-neutral-900 selection:text-white overflow-x-hidden">
       
-      {/* 3D Background - RESTORED ORIGINAL LIGHTING */}
+      {/* 3D Background */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <Canvas dpr={[1, 1.5]}>
+        <Canvas dpr={[1, 1.5]} performance={{ min: 0.5 }}>
           <PointerManager />
+          <AdaptiveDpr pixelated />
+          <AdaptiveEvents />
           <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={45} />
-          <ambientLight intensity={1.5} />
-          <pointLight position={[10, 10, 10]} intensity={2.5} color="#ffffff" />
-          <spotLight position={[-10, 20, 10]} angle={0.2} penumbra={1} intensity={3} color="#0ea5e9" />
-          <spotLight position={[20, -10, 10]} angle={0.2} penumbra={1} intensity={2} color="#f59e0b" />
+          <ambientLight intensity={1.0} />
+          <pointLight position={[10, 10, 10]} intensity={15} color="#ffffff" />
+          <spotLight position={[-15, 20, 15]} angle={0.5} penumbra={1} intensity={20} color="#001a3d" />
+          <spotLight position={[20, -15, 10]} angle={0.5} penumbra={1} intensity={15} color="#ffffff" />
           <Suspense fallback={null}>
             <group scale={3.5}>
               <ArchitecturalSphere />
             </group>
             <Environment preset="studio" />
-            <ContactShadows position={[0, -5, 0]} opacity={0.3} scale={20} blur={2.5} />
+            <ContactShadows position={[0, -5, 0]} opacity={0.1} scale={20} blur={6} far={10} />
           </Suspense>
         </Canvas>
       </div>
