@@ -104,16 +104,16 @@ function ArchitecturalSphere() {
           backside
           samples={6}
           resolution={512}
-          thickness={1.2} 
-          chromaticAberration={0.05} 
-          anisotropy={0.2} 
-          distortion={0}
-          color="#172554" // DEEP SAPPHIRE BLUE
+          thickness={2.0} // Thicker for more crystal-like depth
+          chromaticAberration={0.03} 
+          anisotropy={0.3} 
+          distortion={0.05}
+          color="#020617" // DEEP MIDNIGHT NAVY - Premium & Heavy
           transmission={1} 
           roughness={0} 
-          ior={1.2}
-          emissive="#1e40af" 
-          emissiveIntensity={0.7} 
+          ior={1.4} // Higher refraction for crystal look
+          emissive="#1e3a8a" // Very subtle ink blue glow
+          emissiveIntensity={0.25} 
         />
       </mesh>
     </Float>
@@ -128,6 +128,7 @@ function ProjectCard({ project }: { project: Project }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       className="group relative bg-gradient-to-b from-white/20 to-white/5 backdrop-blur-2xl border border-white/30 rounded-[3rem] overflow-hidden flex flex-col transition-all duration-700 hover:scale-[1.02] shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.15)]"
+      style={{ zIndex: 1 }}
     >
       <div className="relative h-64 bg-neutral-100/10 overflow-hidden border-b border-white/10">
         {project.img && <Image src={project.img} alt={project.title} fill className="object-cover object-top transition-transform duration-1000 group-hover:scale-105" unoptimized />}
@@ -180,10 +181,10 @@ export default function BlendedPortfolio() {
           <AdaptiveDpr pixelated />
           <AdaptiveEvents />
           <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={45} />
-          <ambientLight intensity={2.0} />
+          <ambientLight intensity={1.5} />
           <pointLight position={[10, 10, 10]} intensity={15} color="#ffffff" />
-          <spotLight position={[-15, 20, 15]} angle={0.5} penumbra={1} intensity={25} color="#1e40af" />
-          <spotLight position={[20, -15, 10]} angle={0.5} penumbra={1} intensity={20} color="#ffffff" />
+          <spotLight position={[-15, 20, 15]} angle={0.4} penumbra={1} intensity={20} color="#0f172a" />
+          <spotLight position={[20, -15, 10]} angle={0.4} penumbra={1} intensity={15} color="#ffffff" />
           <Suspense fallback={null}>
             <group scale={3.5}>
               <ArchitecturalSphere />
