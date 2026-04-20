@@ -1,8 +1,8 @@
 'use client';
 
-import React, { Suspense, useRef, useMemo } from 'react';
+import React, { Suspense, useRef, useMemo, useEffect } from 'react';
 import Image from 'next/image';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { 
   PerspectiveCamera,
   MeshTransmissionMaterial,
@@ -49,32 +49,50 @@ const InstagramIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
 );
 
+// --- Pointer Manager (Global for Mouse and Touch) ---
+function PointerManager() {
+  const { mouse } = useThree();
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleMove = (e: any) => {
+      const x = e.touches ? e.touches[0].clientX : e.clientX;
+      const y = e.touches ? e.touches[0].clientY : e.clientY;
+      mouse.x = (x / window.innerWidth) * 2 - 1;
+      mouse.y = -(y / window.innerHeight) * 2 + 1;
+    };
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('touchmove', handleMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('touchmove', handleMove);
+    };
+  }, [mouse]);
+  return null;
+}
+
 // --- Optimized Architectural Sphere ---
 function ArchitecturalSphere() {
   const meshRef = useRef<THREE.Mesh>(null);
+  const { viewport } = useThree();
   
-  // Use low poly detail 3 - still looks perfectly round with auto-smoothing
   const sphereGeo = useMemo(() => new THREE.IcosahedronGeometry(1, 3), []);
 
   useFrame((state) => {
     if (meshRef.current) {
-      const { pointer, viewport, clock } = state;
+      const { mouse, clock } = state;
       const t = clock.getElapsedTime();
       
-      // Faster but extremely smooth damping (0.1 factor)
-      // Position logic: mapped to viewport
       const limitX = Math.max(0, (viewport.width / 7) - 1.1);
       const limitY = Math.max(0, (viewport.height / 7) - 1.1);
 
-      const targetX = pointer.x * limitX;
-      const targetY = pointer.y * limitY;
+      const targetX = mouse.x * limitX;
+      const targetY = mouse.y * limitY;
       
       meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, targetX, 0.1);
       meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY, 0.1);
 
-      // Natural premium rotation
-      meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, (pointer.x * 1.5) + t * 0.1, 0.08);
-      meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, -pointer.y * 1.5, 0.08);
+      meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, (mouse.x * 1.5) + t * 0.1, 0.08);
+      meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, -mouse.y * 1.5, 0.08);
     }
   });
 
@@ -82,18 +100,18 @@ function ArchitecturalSphere() {
     <Float speed={1.5} rotationIntensity={0.5} floatIntensity={0.5}>
       <mesh ref={meshRef} geometry={sphereGeo}>
         <MeshTransmissionMaterial 
-          resolution={512} // ULTRA OPTIMIZATION: Limits internal render resolution
-          samples={4}      // Minimum samples for performance
+          resolution={512}
+          samples={4}
           thickness={0.8} 
-          chromaticAberration={0.04} 
+          chromaticAberration={0.02} 
           anisotropy={0.1} 
           distortion={0}
-          color="#06b6d4"
+          color="#e0f2fe" // Brighter color (Light Cyan) for maximum text contrast
           transmission={1} 
           roughness={0} 
-          ior={1.2}
-          emissive="#0891b2"
-          emissiveIntensity={0.1}
+          ior={1.1}
+          emissive="#ffffff"
+          emissiveIntensity={0.2} // Added soft glow to keep it bright behind black text
         />
       </mesh>
     </Float>
@@ -156,6 +174,7 @@ export default function BlendedPortfolio() {
       {/* 3D Background */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <Canvas dpr={[1, 1.5]} performance={{ min: 0.5 }} gl={{ antialias: false, powerPreference: "high-performance" }}>
+          <PointerManager />
           <AdaptiveDpr pixelated />
           <AdaptiveEvents />
           <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={45} />
