@@ -9,8 +9,6 @@ import {
   Environment,
   ContactShadows,
   AdaptiveDpr,
-  AdaptiveEvents,
-  Float,
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
@@ -34,7 +32,7 @@ interface Project {
   links: ProjectLink[];
 }
 
-// --- Custom Sharp Icons ---
+// --- Custom Icons ---
 const WhatsAppIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.414 0 .018 5.396.015 12.03c0 2.12.553 4.189 1.606 6.06L0 24l6.12-1.605a11.778 11.778 0 005.925 1.585h.005c6.637 0 12.032-5.396 12.035-12.03a11.824 11.824 0 00-3.517-8.403z"/>
@@ -54,72 +52,71 @@ function PointerManager() {
   const { mouse } = useThree();
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const handleMove = (e: any) => {
+    const handleMouseMove = (e: any) => {
       const x = e.touches ? e.touches[0].clientX : e.clientX;
       const y = e.touches ? e.touches[0].clientY : e.clientY;
       mouse.x = (x / window.innerWidth) * 2 - 1;
       mouse.y = -(y / window.innerHeight) * 2 + 1;
     };
-    window.addEventListener('mousemove', handleMove);
-    window.addEventListener('touchmove', handleMove, { passive: true });
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchmove', handleMouseMove, { passive: true });
     return () => {
-      window.removeEventListener('mousemove', handleMove);
-      window.removeEventListener('touchmove', handleMove);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleMouseMove);
     };
   }, [mouse]);
   return null;
 }
 
-// --- High-End Architectural Sphere ---
+// --- RESTORED Original Architectural Sphere ---
 function ArchitecturalSphere() {
   const meshRef = useRef<THREE.Mesh>(null);
   const { viewport } = useThree();
   
-  const sphereGeo = useMemo(() => new THREE.IcosahedronGeometry(1, 4), []);
+  const sphereGeo = useMemo(() => new THREE.IcosahedronGeometry(1, 15), []);
 
   useFrame((state) => {
     if (meshRef.current) {
-      const { mouse, clock } = state;
-      const t = clock.getElapsedTime();
+      const t = state.clock.getElapsedTime();
       
-      const limitX = Math.max(0, (viewport.width / 7) - 1.1);
-      const limitY = Math.max(0, (viewport.height / 7) - 1.1);
-
-      const targetX = mouse.x * limitX;
-      const targetY = mouse.y * limitY;
+      const targetRotationX = state.mouse.y * 0.8;
+      const targetRotationY = state.mouse.x * 0.8;
       
-      meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, targetX, 0.1);
-      meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY, 0.1);
+      meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, targetRotationY + t * 0.1, 0.05);
+      meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, -targetRotationX, 0.05);
+      
+      const margin = 0.5;
+      const limitX = (viewport.width / 2) / 3.5 + margin;
+      const limitY = (viewport.height / 2) / 3.5 + margin;
 
-      meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, (mouse.x * 2) + t * 0.15, 0.08);
-      meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, -mouse.y * 2, 0.08);
+      const targetX = THREE.MathUtils.clamp(state.mouse.x * 6, -limitX, limitX);
+      const targetY = THREE.MathUtils.clamp(state.mouse.y * 4, -limitY, limitY);
+      
+      meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, targetX, 0.08);
+      meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY, 0.08);
     }
   });
 
   return (
-    <Float speed={2} rotationIntensity={1} floatIntensity={1}>
+    <group>
       <mesh ref={meshRef} geometry={sphereGeo}>
         <MeshTransmissionMaterial 
-          backside
-          samples={8}
-          resolution={1024}
+          backside 
+          samples={16} 
           thickness={1.5} 
           chromaticAberration={0.1} 
           anisotropy={0.3} 
-          distortion={0.1}
-          color="#0ea5e9" // Premium Azure Blue - RESTORED
+          color="#0ea5e9"
           transmission={1} 
           roughness={0} 
-          ior={1.3}
-          emissive="#0ea5e9"
-          emissiveIntensity={0.3} // Subtle glow to keep it vibrant
+          ior={1.2}
         />
       </mesh>
-    </Float>
+    </group>
   );
 }
 
-// --- Compact Glass Project Card ---
+// --- Premium Project Card ---
 function ProjectCard({ project }: { project: Project }) {
   return (
     <motion.div 
@@ -129,7 +126,7 @@ function ProjectCard({ project }: { project: Project }) {
       className="group relative bg-gradient-to-b from-white/20 to-white/5 backdrop-blur-2xl border border-white/30 rounded-[3rem] overflow-hidden flex flex-col transition-all duration-700 hover:scale-[1.02] shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.15)]"
     >
       <div className="relative h-64 bg-neutral-100/10 overflow-hidden border-b border-white/10">
-        {project.img && <Image src={project.img} alt={project.title} fill className="object-cover object-top transition-transform duration-1000 group-hover:scale-105" loading="lazy" unoptimized />}
+        {project.img && <Image src={project.img} alt={project.title} fill className="object-cover object-top transition-transform duration-1000 group-hover:scale-105" unoptimized />}
       </div>
 
       <div className="p-10 flex-1 flex flex-col justify-between relative z-10">
@@ -172,23 +169,21 @@ export default function BlendedPortfolio() {
   return (
     <main className="relative min-h-screen w-full bg-white font-sans selection:bg-neutral-900 selection:text-white overflow-x-hidden">
       
-      {/* 3D Background */}
+      {/* 3D Background - RESTORED ORIGINAL LIGHTING */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <Canvas dpr={[1, 2]} performance={{ min: 0.5 }}>
+        <Canvas dpr={[1, 1.5]}>
           <PointerManager />
-          <AdaptiveDpr pixelated />
-          <AdaptiveEvents />
           <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={45} />
           <ambientLight intensity={1.5} />
-          <pointLight position={[10, 10, 10]} intensity={10} color="#ffffff" />
-          <spotLight position={[-15, 20, 15]} angle={0.5} penumbra={1} intensity={25} color="#0ea5e9" />
-          <spotLight position={[20, -15, 10]} angle={0.5} penumbra={1} intensity={20} color="#ffaa00" />
+          <pointLight position={[10, 10, 10]} intensity={2.5} color="#ffffff" />
+          <spotLight position={[-10, 20, 10]} angle={0.2} penumbra={1} intensity={3} color="#0ea5e9" />
+          <spotLight position={[20, -10, 10]} angle={0.2} penumbra={1} intensity={2} color="#f59e0b" />
           <Suspense fallback={null}>
             <group scale={3.5}>
               <ArchitecturalSphere />
             </group>
-            <Environment preset="city" />
-            <ContactShadows position={[0, -5, 0]} opacity={0.05} scale={20} blur={6} far={10} />
+            <Environment preset="studio" />
+            <ContactShadows position={[0, -5, 0]} opacity={0.3} scale={20} blur={2.5} />
           </Suspense>
         </Canvas>
       </div>
