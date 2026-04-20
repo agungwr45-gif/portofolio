@@ -152,10 +152,10 @@ function ProjectCard({ project }: { project: Project }) {
 
 export default function BlendedPortfolio() {
   const projects: Project[] = [
-    { title: "blog.jackton.xyz", desc: "Portal berita teknologi dan properti yang dioperasikan sepenuhnya oleh jurnalis AI. Menyajikan informasi industri secara otomatis sepanjang waktu.", img: "/portofolio/assets/preview-blog.jackton.xyz.png", links: [{ label: "Website", type: "web", url: "http://blog.jackton.xyz" }, { label: "Instagram", type: "ig", url: "https://instagram.com/jackton.xyz" }] },
-    { title: "lolos.online", desc: "Membangun platform persiapan seleksi online dengan sistem automasi evaluasi dan penilaian berbasis AI. Platform ini melakukan analisa performa personal untuk memberikan rekomendasi belajar yang akurat bagi peserta ujian.", img: "/portofolio/assets/preview-lolos.online.png", links: [{ label: "Website", type: "web", url: "http://lolos.online" }] },
-    { title: "bettercalljack.lab", desc: "Laboratorium eksperimental di Instagram yang mengeksarasi sinergi antara kreativitas visual dan algoritma media sosial.", img: "/portofolio/assets/preview-bettercalljack.lab.jpg", links: [{ label: "Instagram", type: "ig", url: "https://instagram.com/bettercalljack.lab" }] },
-    { title: "Fantasy Spa", desc: "Berhasil mengimplementasikan perbaikan operasional dan performance marketing, yang sukses menaikkan jumlah pengunjung hingga 61% dan mendorong pertumbuhan net profit sebesar 74% dibandingkan bulan sebelumnya.", img: "/portofolio/assets/preview-fantasyspa.jpg", links: [{ label: "Drive Archive", type: "drive", url: "https://drive.google.com/drive/folders/1ZQOfb5t7KB6zJIxm1dZwZ0NIdf4UuO6z?usp=sharing" }] }
+    { title: "blog.jackton.xyz", desc: "Portal berita teknologi dan properti yang dioperasikan sepenuhnya oleh jurnalis AI. Menyajikan informasi industri secara otomatis sepanjang waktu.", img: "/assets/preview-blog.jackton.xyz.png", links: [{ label: "Website", type: "web", url: "http://blog.jackton.xyz" }, { label: "Instagram", type: "ig", url: "https://instagram.com/jackton.xyz" }] },
+    { title: "lolos.online", desc: "Membangun platform persiapan seleksi online dengan sistem automasi evaluasi dan penilaian berbasis AI. Platform ini melakukan analisa performa personal untuk memberikan rekomendasi belajar yang akurat bagi peserta ujian.", img: "/assets/preview-lolos.online.png", links: [{ label: "Website", type: "web", url: "http://lolos.online" }] },
+    { title: "bettercalljack.lab", desc: "Laboratorium eksperimental di Instagram yang mengeksarasi sinergi antara kreativitas visual dan algoritma media sosial.", img: "/assets/preview-bettercalljack.lab.jpg", links: [{ label: "Instagram", type: "ig", url: "https://instagram.com/bettercalljack.lab" }] },
+    { title: "Fantasy Spa", desc: "Berhasil mengimplementasikan perbaikan operasional dan performance marketing, yang sukses menaikkan jumlah pengunjung hingga 61% dan mendorong pertumbuhan net profit sebesar 74% dibandingkan bulan sebelumnya.", img: "/assets/preview-fantasyspa.jpg", links: [{ label: "Drive Archive", type: "drive", url: "https://drive.google.com/drive/folders/1ZQOfb5t7KB6zJIxm1dZwZ0NIdf4UuO6z?usp=sharing" }] }
   ];
 
   const stockedTools = [
@@ -192,7 +192,7 @@ export default function BlendedPortfolio() {
         {/* Hero Section */}
         <section className="pt-32 sm:pt-40 pb-24 px-6 max-w-5xl w-full flex flex-col items-center text-center">
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-44 md:h-44 mb-10 rounded-full overflow-hidden border-[4px] border-white shadow-2xl bg-white">
-            <Image src="/portofolio/assets/foto-agung.JPG" alt="Agung Wahyu Riyadi" fill className="object-cover" unoptimized />
+            <Image src="/assets/foto-agung.JPG" alt="Agung Wahyu Riyadi" fill className="object-cover" unoptimized />
           </motion.div>
 
           <motion.div className="mb-10 px-8 py-2.5 sm:px-10 sm:py-3 rounded-full border border-neutral-200 bg-white/40 backdrop-blur-xl shadow-sm">
@@ -208,7 +208,7 @@ export default function BlendedPortfolio() {
           </motion.p>
 
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 relative z-20 w-full sm:w-auto px-6">
-            <a href="/portofolio/assets/Profile resume.pdf" target="_blank" rel="noopener noreferrer" className="px-10 py-5 bg-neutral-950 text-white rounded-full font-black text-[12px] uppercase tracking-widest hover:scale-105 transition-all shadow-[0_20px_50px_rgba(0,0,0,0.2)] active:scale-95 flex items-center justify-center gap-2">
+            <a href="/assets/Profile resume.pdf" target="_blank" rel="noopener noreferrer" className="px-10 py-5 bg-neutral-950 text-white rounded-full font-black text-[12px] uppercase tracking-widest hover:scale-105 transition-all shadow-[0_20px_50px_rgba(0,0,0,0.2)] active:scale-95 flex items-center justify-center gap-2">
               <Download size={18} /> Download CV
             </a>
             <a href="mailto:agungwr45@gmail.com" className="px-10 py-5 bg-white/40 backdrop-blur-2xl border-2 border-white rounded-full font-black text-[12px] uppercase tracking-widest hover:bg-white transition-all active:scale-95 text-neutral-900 shadow-xl flex items-center justify-center gap-2">
