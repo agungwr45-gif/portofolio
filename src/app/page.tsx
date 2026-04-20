@@ -8,6 +8,8 @@ import {
   MeshTransmissionMaterial,
   Environment,
   ContactShadows,
+  AdaptiveDpr,
+  AdaptiveEvents,
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
@@ -46,7 +48,7 @@ const InstagramIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
 );
 
-// --- Pointer Manager (Global Mouse Tracking) ---
+// --- Pointer Manager ---
 function PointerManager() {
   const { mouse } = useThree();
   useEffect(() => {
@@ -61,32 +63,28 @@ function PointerManager() {
   return null;
 }
 
-// --- High-End Architectural Sphere ---
+// --- Optimized Architectural Sphere ---
 function ArchitecturalSphere() {
   const meshRef = useRef<THREE.Mesh>(null);
   const { viewport } = useThree();
   
-  const sphereGeo = useMemo(() => new THREE.IcosahedronGeometry(1, 15), []);
+  const sphereGeo = useMemo(() => new THREE.IcosahedronGeometry(1, 3), []);
 
   useFrame((state) => {
     if (meshRef.current) {
       const t = state.clock.getElapsedTime();
-      
-      // Silky smooth rotation
       const targetRotationX = state.mouse.y * 1.0;
       const targetRotationY = state.mouse.x * 1.0;
       
       meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, targetRotationY + t * 0.1, 0.06);
       meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, -targetRotationX, 0.06);
       
-      // Strict screen boundaries (Stay within viewport)
       const limitX = Math.max(0, (viewport.width / 7) - 1.1);
       const limitY = Math.max(0, (viewport.height / 7) - 1.1);
 
       const targetX = state.mouse.x * limitX;
       const targetY = state.mouse.y * limitY;
       
-      // Silky smooth follow
       meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, targetX, 0.06);
       meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY, 0.06);
     }
@@ -96,18 +94,17 @@ function ArchitecturalSphere() {
     <group>
       <mesh ref={meshRef} geometry={sphereGeo}>
         <MeshTransmissionMaterial 
-          backside 
-          samples={16} 
+          samples={6}
           thickness={1.0} 
-          chromaticAberration={0.2} 
-          anisotropy={0.5} 
-          distortion={0.1}
+          chromaticAberration={0.05} 
+          anisotropy={0.1} 
+          distortion={0}
           color="#06b6d4"
           transmission={1} 
           roughness={0.02} 
-          ior={1.4}
+          ior={1.2}
           emissive="#0891b2"
-          emissiveIntensity={0.2}
+          emissiveIntensity={0.1}
         />
       </mesh>
     </group>
@@ -169,7 +166,9 @@ export default function BlendedPortfolio() {
       
       {/* 3D Background */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <Canvas dpr={[1, 2]}>
+        <Canvas dpr={[1, 1.5]} performance={{ min: 0.5 }}>
+          <AdaptiveDpr pixelated />
+          <AdaptiveEvents />
           <PointerManager />
           <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={45} />
           <ambientLight intensity={1.5} />
@@ -181,7 +180,7 @@ export default function BlendedPortfolio() {
               <ArchitecturalSphere />
             </group>
             <Environment preset="studio" />
-            <ContactShadows position={[0, -5, 0]} opacity={0.1} scale={20} blur={5} />
+            <ContactShadows position={[0, -5, 0]} opacity={0.05} scale={20} blur={6} far={10} />
           </Suspense>
         </Canvas>
       </div>
