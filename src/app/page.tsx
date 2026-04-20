@@ -5,12 +5,8 @@ import Image from 'next/image';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { 
   PerspectiveCamera,
-  MeshTransmissionMaterial,
-  Environment,
-  ContactShadows,
   AdaptiveDpr,
   AdaptiveEvents,
-  Float,
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
@@ -49,74 +45,41 @@ const InstagramIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
 );
 
-// --- Pointer Manager ---
-function PointerManager() {
-  const { mouse } = useThree();
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const handleMove = (e: any) => {
-      const x = e.touches ? e.touches[0].clientX : e.clientX;
-      const y = e.touches ? e.touches[0].clientY : e.clientY;
-      mouse.x = (x / window.innerWidth) * 2 - 1;
-      mouse.y = -(y / window.innerHeight) * 2 + 1;
-    };
-    window.addEventListener('mousemove', handleMove);
-    window.addEventListener('touchmove', handleMove, { passive: true });
-    return () => {
-      window.removeEventListener('mousemove', handleMove);
-      window.removeEventListener('touchmove', handleMove);
-    };
-  }, [mouse]);
-  return null;
-}
-
-// --- Deep Midnight Architectural Sphere ---
-function ArchitecturalSphere() {
+// --- Masculine Aura Blob ---
+function AuraBlob({ color, index }: { color: string, index: number }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const { viewport } = useThree();
-  
-  // Optimized detail 4 for performance while maintaining roundness
-  const sphereGeo = useMemo(() => new THREE.IcosahedronGeometry(1, 4), []);
+  const initialPos = useMemo(() => [
+    (Math.random() - 0.5) * 20,
+    (Math.random() - 0.5) * 12,
+    -8 - Math.random() * 8
+  ], []);
 
   useFrame((state) => {
     if (meshRef.current) {
-      const { mouse, clock } = state;
-      const t = clock.getElapsedTime();
-      
-      const limitX = Math.max(0, (viewport.width / 7) - 1.1);
-      const limitY = Math.max(0, (viewport.height / 7) - 1.1);
-
-      const targetX = mouse.x * limitX;
-      const targetY = mouse.y * limitY;
-      
-      meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, targetX, 0.1);
-      meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY, 0.1);
-
-      meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, (mouse.x * 2) + t * 0.15, 0.08);
-      meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, -mouse.y * 2, 0.08);
+      const t = state.clock.getElapsedTime();
+      meshRef.current.position.x = initialPos[0] + Math.sin(t * 0.3 + index) * 6;
+      meshRef.current.position.y = initialPos[1] + Math.cos(t * 0.4 + index) * 4;
+      meshRef.current.rotation.z = t * 0.05;
     }
   });
 
   return (
-    <Float speed={2} rotationIntensity={1} floatIntensity={0.5}>
-      <mesh ref={meshRef} geometry={sphereGeo}>
-        <MeshTransmissionMaterial 
-          backside
-          samples={6}
-          resolution={512}
-          thickness={2.0} // Thicker for more crystal-like depth
-          chromaticAberration={0.03} 
-          anisotropy={0.3} 
-          distortion={0.05}
-          color="#020617" // DEEP MIDNIGHT NAVY - Premium & Heavy
-          transmission={1} 
-          roughness={0} 
-          ior={1.4} // Higher refraction for crystal look
-          emissive="#1e3a8a" // Very subtle ink blue glow
-          emissiveIntensity={0.25} 
-        />
-      </mesh>
-    </Float>
+    <mesh ref={meshRef} position={initialPos as [number, number, number]}>
+      <icosahedronGeometry args={[7, 1]} />
+      <meshBasicMaterial color={color} transparent opacity={0.35} />
+    </mesh>
+  );
+}
+
+// --- Kinetic Aura System (Masculine Palette) ---
+function KineticAura() {
+  return (
+    <group>
+      <AuraBlob color="#1e3a8a" index={1} /> {/* Deep Sapphire */}
+      <AuraBlob color="#334155" index={2} /> {/* Slate Charcoal */}
+      <AuraBlob color="#172554" index={3} /> {/* Midnight Blue */}
+      <AuraBlob color="#94a3b8" index={4} /> {/* Steel Silver */}
+    </group>
   );
 }
 
@@ -127,10 +90,10 @@ function ProjectCard({ project }: { project: Project }) {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="group relative bg-gradient-to-b from-white/20 to-white/5 backdrop-blur-2xl border border-white/30 rounded-[3rem] overflow-hidden flex flex-col transition-all duration-700 hover:scale-[1.02] shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.15)]"
+      className="group relative bg-white/40 backdrop-blur-[60px] backdrop-saturate-[1.8] border border-white/60 rounded-[3rem] overflow-hidden flex flex-col transition-all duration-700 hover:scale-[1.02] shadow-[0_40px_100px_rgba(0,0,0,0.05),inset_0_1px_2px_rgba(255,255,255,0.8)]"
       style={{ zIndex: 1 }}
     >
-      <div className="relative h-64 bg-neutral-100/10 overflow-hidden border-b border-white/10">
+      <div className="relative h-64 bg-neutral-900/5 overflow-hidden border-b border-white/40">
         {project.img && <Image src={project.img} alt={project.title} fill className="object-cover object-top transition-transform duration-1000 group-hover:scale-105" unoptimized />}
       </div>
 
@@ -172,25 +135,16 @@ export default function BlendedPortfolio() {
   ];
 
   return (
-    <main className="relative min-h-screen w-full bg-white font-sans selection:bg-neutral-900 selection:text-white overflow-x-hidden">
+    <main className="relative min-h-screen w-full bg-slate-100 font-sans selection:bg-neutral-900 selection:text-white overflow-x-hidden">
       
-      {/* 3D Background */}
+      {/* Stealth Kinetic Aura 3D Background */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <Canvas dpr={[1, 1.5]} performance={{ min: 0.5 }}>
-          <PointerManager />
+        <Canvas dpr={[1, 1.5]}>
           <AdaptiveDpr pixelated />
           <AdaptiveEvents />
           <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={45} />
-          <ambientLight intensity={1.5} />
-          <pointLight position={[10, 10, 10]} intensity={15} color="#ffffff" />
-          <spotLight position={[-15, 20, 15]} angle={0.4} penumbra={1} intensity={20} color="#0f172a" />
-          <spotLight position={[20, -15, 10]} angle={0.4} penumbra={1} intensity={15} color="#ffffff" />
           <Suspense fallback={null}>
-            <group scale={3.5}>
-              <ArchitecturalSphere />
-            </group>
-            <Environment preset="city" />
-            <ContactShadows position={[0, -5, 0]} opacity={0.05} scale={20} blur={6} far={10} />
+            <KineticAura />
           </Suspense>
         </Canvas>
       </div>
@@ -228,7 +182,7 @@ export default function BlendedPortfolio() {
 
         {/* Jendela Konten (iOS Glass Effect) */}
         <section className="max-w-5xl w-full px-6 sm:px-8 mb-32 sm:mb-40">
-          <div className="bg-gradient-to-br from-white/25 via-white/10 to-transparent backdrop-blur-3xl border border-white/40 p-8 sm:p-12 md:p-16 rounded-[3rem] sm:rounded-[4rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] grid grid-cols-1 lg:grid-cols-12 gap-12 sm:gap-16 relative overflow-hidden">
+          <div className="bg-white/40 backdrop-blur-[60px] backdrop-saturate-[1.8] border border-white/60 p-8 sm:p-12 md:p-16 rounded-[3rem] sm:rounded-[4rem] shadow-[0_40px_100px_rgba(0,0,0,0.05),inset_0_1px_2px_rgba(255,255,255,0.8)] grid grid-cols-1 lg:grid-cols-12 gap-12 sm:gap-16 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none" />
             <div className="lg:col-span-7 text-center lg:text-left text-neutral-950 relative z-10">
               <h2 className="text-[11px] uppercase tracking-[0.8em] text-neutral-400 font-black mb-6 sm:mb-8">THE MISSION</h2>
@@ -274,8 +228,8 @@ export default function BlendedPortfolio() {
 
         {/* Tools Section */}
         <section className="max-w-5xl w-full px-6 mb-32 sm:mb-40">
-          <div className="bg-gradient-to-b from-white/20 to-white/5 backdrop-blur-3xl border border-white/30 p-8 sm:p-12 md:p-16 rounded-[3rem] sm:rounded-[4rem] shadow-2xl text-center relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/5 pointer-events-none" />
+          <div className="bg-white/40 backdrop-blur-[60px] backdrop-saturate-[1.8] border border-white/60 p-8 sm:p-12 md:p-16 rounded-[3rem] sm:rounded-[4rem] shadow-[0_40px_100px_rgba(0,0,0,0.05),inset_0_1px_2px_rgba(255,255,255,0.8)] text-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none" />
             <h2 className="text-[11px] uppercase tracking-[1em] text-neutral-400 font-black mb-12 sm:mb-16 relative z-10">STOCKED TOOLS</h2>
             <div className="flex flex-wrap justify-center gap-x-6 gap-y-4 sm:gap-x-10 sm:gap-y-6 relative z-10">
               {stockedTools.map((tool, i) => (
@@ -288,8 +242,8 @@ export default function BlendedPortfolio() {
         </section>
 
         {/* Footer */}
-        <footer className="mx-6 mb-12 py-16 sm:py-24 px-6 bg-gradient-to-b from-white/20 to-white/5 backdrop-blur-3xl border border-white/30 rounded-[3rem] sm:rounded-[4rem] text-center shadow-2xl w-[calc(100%-3rem)] relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/5 pointer-events-none" />
+        <footer className="mx-6 mb-12 py-16 sm:py-24 px-6 bg-white/40 backdrop-blur-[60px] backdrop-saturate-[1.8] border border-white/60 rounded-[3rem] sm:rounded-[4rem] text-center shadow-[0_40px_100px_rgba(0,0,0,0.05),inset_0_1px_2px_rgba(255,255,255,0.8)] w-[calc(100%-3rem)] relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none" />
           <h2 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter mb-8 sm:mb-12 text-neutral-950 uppercase opacity-20 relative z-10">LET&apos;S BUILD.</h2>
           <div className="pt-8 sm:pt-12 border-t border-neutral-200 relative z-10">
             <p className="text-[14px] sm:text-[16px] text-neutral-950 font-black uppercase tracking-[1.5em]">2026</p>
