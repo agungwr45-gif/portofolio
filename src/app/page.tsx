@@ -1,8 +1,8 @@
 'use client';
 
-import React, { Suspense, useRef, useMemo, useEffect } from 'react';
+import React, { Suspense, useRef, useMemo } from 'react';
 import Image from 'next/image';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { 
   PerspectiveCamera,
   MeshTransmissionMaterial,
@@ -10,6 +10,7 @@ import {
   ContactShadows,
   AdaptiveDpr,
   AdaptiveEvents,
+  Float,
 } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
@@ -48,66 +49,54 @@ const InstagramIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
 );
 
-// --- Pointer Manager ---
-function PointerManager() {
-  const { mouse } = useThree();
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const handleMouseMove = (e: MouseEvent) => {
-      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [mouse]);
-  return null;
-}
-
 // --- Optimized Architectural Sphere ---
 function ArchitecturalSphere() {
   const meshRef = useRef<THREE.Mesh>(null);
-  const { viewport } = useThree();
   
+  // Use low poly detail 3 - still looks perfectly round with auto-smoothing
   const sphereGeo = useMemo(() => new THREE.IcosahedronGeometry(1, 3), []);
 
   useFrame((state) => {
     if (meshRef.current) {
-      const t = state.clock.getElapsedTime();
-      const targetRotationX = state.mouse.y * 1.0;
-      const targetRotationY = state.mouse.x * 1.0;
+      const { pointer, viewport, clock } = state;
+      const t = clock.getElapsedTime();
       
-      meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, targetRotationY + t * 0.1, 0.06);
-      meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, -targetRotationX, 0.06);
-      
+      // Faster but extremely smooth damping (0.1 factor)
+      // Position logic: mapped to viewport
       const limitX = Math.max(0, (viewport.width / 7) - 1.1);
       const limitY = Math.max(0, (viewport.height / 7) - 1.1);
 
-      const targetX = state.mouse.x * limitX;
-      const targetY = state.mouse.y * limitY;
+      const targetX = pointer.x * limitX;
+      const targetY = pointer.y * limitY;
       
-      meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, targetX, 0.06);
-      meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY, 0.06);
+      meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, targetX, 0.1);
+      meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY, 0.1);
+
+      // Natural premium rotation
+      meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, (pointer.x * 1.5) + t * 0.1, 0.08);
+      meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, -pointer.y * 1.5, 0.08);
     }
   });
 
   return (
-    <group>
+    <Float speed={1.5} rotationIntensity={0.5} floatIntensity={0.5}>
       <mesh ref={meshRef} geometry={sphereGeo}>
         <MeshTransmissionMaterial 
-          samples={6}
-          thickness={1.0} 
-          chromaticAberration={0.05} 
+          resolution={512} // ULTRA OPTIMIZATION: Limits internal render resolution
+          samples={4}      // Minimum samples for performance
+          thickness={0.8} 
+          chromaticAberration={0.04} 
           anisotropy={0.1} 
           distortion={0}
           color="#06b6d4"
           transmission={1} 
-          roughness={0.02} 
+          roughness={0} 
           ior={1.2}
           emissive="#0891b2"
           emissiveIntensity={0.1}
         />
       </mesh>
-    </group>
+    </Float>
   );
 }
 
@@ -121,7 +110,7 @@ function ProjectCard({ project }: { project: Project }) {
       className="group relative bg-gradient-to-b from-white/20 to-white/5 backdrop-blur-2xl border border-white/30 rounded-[3rem] overflow-hidden flex flex-col transition-all duration-700 hover:scale-[1.02] shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.15)]"
     >
       <div className="relative h-64 bg-neutral-100/10 overflow-hidden border-b border-white/10">
-        {project.img && <Image src={project.img} alt={project.title} fill className="object-cover object-top transition-transform duration-1000 group-hover:scale-105" unoptimized />}
+        {project.img && <Image src={project.img} alt={project.title} fill className="object-cover object-top transition-transform duration-1000 group-hover:scale-105" loading="lazy" unoptimized />}
       </div>
 
       <div className="p-10 flex-1 flex flex-col justify-between relative z-10">
@@ -166,13 +155,12 @@ export default function BlendedPortfolio() {
       
       {/* 3D Background */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <Canvas dpr={[1, 1.5]} performance={{ min: 0.5 }}>
+        <Canvas dpr={[1, 1.5]} performance={{ min: 0.5 }} gl={{ antialias: false, powerPreference: "high-performance" }}>
           <AdaptiveDpr pixelated />
           <AdaptiveEvents />
-          <PointerManager />
           <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={45} />
           <ambientLight intensity={1.5} />
-          <pointLight position={[10, 10, 10]} intensity={8} color="#ffffff" />
+          <pointLight position={[10, 10, 10]} intensity={10} color="#ffffff" />
           <spotLight position={[-15, 20, 15]} angle={0.4} penumbra={1} intensity={20} color="#0891b2" />
           <spotLight position={[20, -15, 10]} angle={0.4} penumbra={1} intensity={12} color="#0ea5e9" />
           <Suspense fallback={null}>
@@ -180,7 +168,7 @@ export default function BlendedPortfolio() {
               <ArchitecturalSphere />
             </group>
             <Environment preset="studio" />
-            <ContactShadows position={[0, -5, 0]} opacity={0.05} scale={20} blur={6} far={10} />
+            <ContactShadows position={[0, -5, 0]} opacity={0.05} scale={20} blur={6} far={10} resolution={256} />
           </Suspense>
         </Canvas>
       </div>
@@ -191,7 +179,7 @@ export default function BlendedPortfolio() {
         {/* Hero Section */}
         <section className="pt-32 sm:pt-40 pb-24 px-6 max-w-5xl w-full flex flex-col items-center text-center">
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-44 md:h-44 mb-10 rounded-full overflow-hidden border-[4px] border-white shadow-2xl bg-white">
-            <Image src="/portofolio/assets/foto-agung.JPG" alt="Agung Wahyu Riyadi" fill className="object-cover" unoptimized />
+            <Image src="/portofolio/assets/foto-agung.JPG" alt="Agung Wahyu Riyadi" fill className="object-cover" priority unoptimized />
           </motion.div>
 
           <motion.div className="mb-10 px-8 py-2.5 sm:px-10 sm:py-3 rounded-full border border-neutral-200 bg-white/40 backdrop-blur-xl shadow-sm">
@@ -219,9 +207,7 @@ export default function BlendedPortfolio() {
         {/* Jendela Konten (iOS Glass Effect) */}
         <section className="max-w-5xl w-full px-6 sm:px-8 mb-32 sm:mb-40">
           <div className="bg-gradient-to-br from-white/25 via-white/10 to-transparent backdrop-blur-3xl border border-white/40 p-8 sm:p-12 md:p-16 rounded-[3rem] sm:rounded-[4rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] grid grid-cols-1 lg:grid-cols-12 gap-12 sm:gap-16 relative overflow-hidden">
-            {/* Glossy Overlay Highlight */}
             <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none" />
-            
             <div className="lg:col-span-7 text-center lg:text-left text-neutral-950 relative z-10">
               <h2 className="text-[11px] uppercase tracking-[0.8em] text-neutral-400 font-black mb-6 sm:mb-8">THE MISSION</h2>
               <p className="text-3xl sm:text-4xl md:text-5xl font-black leading-tight tracking-tighter mb-6 sm:mb-8 uppercase">
