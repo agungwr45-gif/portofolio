@@ -63,27 +63,27 @@ function ProjectCard({ project }: { project: Project }) {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="group relative bg-white/40 backdrop-blur-[60px] backdrop-saturate-[1.8] border border-white/60 rounded-[3rem] overflow-hidden flex flex-col transition-all duration-700 hover:scale-[1.02] shadow-[0_40px_100px_rgba(0,0,0,0.05),inset_0_1px_2px_rgba(255,255,255,0.8)]"
+      className="group relative bg-white/40 backdrop-blur-[60px] backdrop-saturate-[1.8] border border-white/60 rounded-[1.5rem] sm:rounded-[3rem] overflow-hidden flex flex-col transition-all duration-700 hover:scale-[1.02] shadow-[0_20px_50px_rgba(0,0,0,0.05),inset_0_1px_2px_rgba(255,255,255,0.8)]"
       style={{ zIndex: 1 }}
     >
-      <div className="relative h-64 bg-neutral-900/5 overflow-hidden border-b border-white/40">
+      <div className="relative h-28 xs:h-36 sm:h-64 bg-neutral-900/5 overflow-hidden border-b border-white/40">
         {project.img && <Image src={project.img} alt={project.title} fill className="object-cover object-top transition-transform duration-1000 group-hover:scale-105" unoptimized />}
       </div>
 
-      <div className="p-10 flex-1 flex flex-col justify-between relative z-10">
+      <div className="p-4 sm:p-10 flex-1 flex flex-col justify-between relative z-10">
         <div>
-          <div className="flex justify-between items-start mb-6">
-            <h3 className="text-3xl font-black tracking-tighter text-neutral-950 uppercase leading-none">{project.title}</h3>
+          <div className="flex justify-between items-start mb-2 sm:mb-6">
+            <h3 className="text-sm xs:text-base md:text-3xl font-black tracking-tighter text-neutral-950 uppercase leading-none">{project.title}</h3>
           </div>
-          <p className="text-neutral-900 text-lg font-bold opacity-80 mb-8 leading-snug">{project.desc}</p>
+          <p className="text-neutral-900 text-[10px] xs:text-xs md:text-lg font-bold opacity-80 mb-4 sm:mb-8 leading-tight sm:leading-snug">{project.desc}</p>
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-1.5 sm:gap-3">
           {project.links.map((link, i) => (
-            <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2.5 px-8 py-4 bg-neutral-950 text-white rounded-full text-[11px] font-black tracking-widest uppercase hover:bg-black transition-all active:scale-95 shadow-lg">
-              {link.type === 'web' && <ExternalLink size={14} />}
-              {link.type === 'ig' && <InstagramIcon size={14} />}
-              {link.type === 'drive' && <Download size={14} />}
+            <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 sm:gap-2.5 px-3 py-2 sm:px-8 sm:py-4 bg-neutral-950 text-white rounded-full text-[8px] sm:text-[11px] font-black tracking-widest uppercase hover:bg-black transition-all active:scale-95 shadow-md">
+              {link.type === 'web' && <ExternalLink className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />}
+              {link.type === 'ig' && <InstagramIcon size={12} />}
+              {link.type === 'drive' && <Download className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />}
               {link.label}
             </a>
           ))}
@@ -185,7 +185,7 @@ export default function BlendedPortfolio() {
             <h3 className="text-4xl sm:text-6xl md:text-[100px] font-black tracking-tighter leading-[0.8] uppercase text-neutral-950">Selected <br /><span className="text-neutral-400 italic">Works.</span></h3>
           </div>
           
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10">
+          <section className="grid grid-cols-2 gap-3 sm:gap-10">
             {projects.map((project, i) => (
               <ProjectCard key={i} project={project} />
             ))}
