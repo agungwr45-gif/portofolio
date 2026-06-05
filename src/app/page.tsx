@@ -41,17 +41,18 @@ const InstagramIcon = ({ size = 16 }: { size?: number }) => (
 // --- CSS Aura Background ---
 function CSSAura() {
   return (
-    <>
-      <style>{`
-        @keyframes aura1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(80px,-60px) scale(1.15)} }
-        @keyframes aura2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-60px,80px) scale(1.2)} }
-        @keyframes aura3 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(40px,60px) scale(0.9)} }
-        .aura-blob { position:absolute; border-radius:50%; filter:blur(80px); opacity:0.35; will-change:transform; }
-      `}</style>
-      <div className="aura-blob" style={{width:600,height:600,background:'#1e3a8a',top:'-10%',left:'-10%',animation:'aura1 12s ease-in-out infinite'}} />
-      <div className="aura-blob" style={{width:500,height:500,background:'#334155',bottom:'-5%',right:'-5%',animation:'aura2 15s ease-in-out infinite'}} />
-      <div className="aura-blob" style={{width:400,height:400,background:'#172554',top:'40%',left:'40%',animation:'aura3 18s ease-in-out infinite'}} />
-    </>
+    <div 
+      className="absolute inset-0 w-full h-full"
+      style={{
+        background: `
+          radial-gradient(circle at 15% 15%, rgba(30, 58, 138, 0.12) 0%, transparent 50%),
+          radial-gradient(circle at 85% 85%, rgba(51, 65, 85, 0.15) 0%, transparent 50%),
+          radial-gradient(circle at 50% 50%, rgba(23, 37, 84, 0.12) 0%, transparent 60%),
+          radial-gradient(circle at 80% 20%, rgba(148, 163, 184, 0.08) 0%, transparent 40%)
+        `,
+        backgroundColor: '#f1f5f9'
+      }}
+    />
   );
 }
 
