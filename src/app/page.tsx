@@ -1,14 +1,7 @@
 'use client';
 
-import React, { Suspense, useRef, useMemo, useEffect } from 'react';
+import React from 'react';
 import Image from 'next/image';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { 
-  PerspectiveCamera,
-  AdaptiveDpr,
-  AdaptiveEvents,
-} from '@react-three/drei';
-import * as THREE from 'three';
 import { motion } from 'framer-motion';
 import { 
   ExternalLink, 
@@ -45,41 +38,20 @@ const InstagramIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
 );
 
-// --- Masculine Aura Blob ---
-function AuraBlob({ color, index }: { color: string, index: number }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const initialPos = useMemo(() => [
-    (Math.random() - 0.5) * 20,
-    (Math.random() - 0.5) * 12,
-    -8 - Math.random() * 8
-  ], []);
-
-  useFrame((state) => {
-    if (meshRef.current) {
-      const t = state.clock.getElapsedTime();
-      meshRef.current.position.x = initialPos[0] + Math.sin(t * 0.3 + index) * 6;
-      meshRef.current.position.y = initialPos[1] + Math.cos(t * 0.4 + index) * 4;
-      meshRef.current.rotation.z = t * 0.05;
-    }
-  });
-
+// --- CSS Aura Background ---
+function CSSAura() {
   return (
-    <mesh ref={meshRef} position={initialPos as [number, number, number]}>
-      <icosahedronGeometry args={[7, 1]} />
-      <meshBasicMaterial color={color} transparent opacity={0.35} />
-    </mesh>
-  );
-}
-
-// --- Kinetic Aura System (Masculine Palette) ---
-function KineticAura() {
-  return (
-    <group>
-      <AuraBlob color="#1e3a8a" index={1} /> {/* Deep Sapphire */}
-      <AuraBlob color="#334155" index={2} /> {/* Slate Charcoal */}
-      <AuraBlob color="#172554" index={3} /> {/* Midnight Blue */}
-      <AuraBlob color="#94a3b8" index={4} /> {/* Steel Silver */}
-    </group>
+    <>
+      <style>{`
+        @keyframes aura1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(80px,-60px) scale(1.15)} }
+        @keyframes aura2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-60px,80px) scale(1.2)} }
+        @keyframes aura3 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(40px,60px) scale(0.9)} }
+        .aura-blob { position:absolute; border-radius:50%; filter:blur(80px); opacity:0.35; will-change:transform; }
+      `}</style>
+      <div className="aura-blob" style={{width:600,height:600,background:'#1e3a8a',top:'-10%',left:'-10%',animation:'aura1 12s ease-in-out infinite'}} />
+      <div className="aura-blob" style={{width:500,height:500,background:'#334155',bottom:'-5%',right:'-5%',animation:'aura2 15s ease-in-out infinite'}} />
+      <div className="aura-blob" style={{width:400,height:400,background:'#172554',top:'40%',left:'40%',animation:'aura3 18s ease-in-out infinite'}} />
+    </>
   );
 }
 
@@ -122,8 +94,8 @@ function ProjectCard({ project }: { project: Project }) {
 
 export default function BlendedPortfolio() {
   const projects: Project[] = [
-    { title: "indotower.com", desc: "Platform media digital yang berfokus pada industri properti premium, perkembangan gedung pencakar langit (skyscraper), dan analisis pasar real estat di Indonesia. Lewat slogan \u2018Indonesia From The Top Floor\u2019, platform ini menyajikan informasi terkini mengenai proyek mega-struktur ikonik, profil taipan pengembang properti, hingga tren hunian vertikal mewah bagi para investor dan pelaku industri.", img: "/portofolio/assets/preview-indotower.com.png", links: [{ label: "Website", type: "web", url: "https://indotower.com" }, { label: "Instagram", type: "ig", url: "https://instagram.com/indotower.id" }] },
-    { title: "lolos.online", desc: "Membangun platform persiapan seleksi online dengan sistem automasi evaluasi dan penilaian berbasis AI. Platform ini melakukan analisa performa personal untuk memberikan rekomendasi belajar yang akurat bagi peserta ujian.", img: "/portofolio/assets/preview-lolos.online.png", links: [{ label: "Website", type: "web", url: "http://lolos.online" }] },
+    { title: "indotower.com", desc: "Platform media digital yang berfokus pada industri properti premium, perkembangan gedung pencakar langit (skyscraper), dan analisis pasar real estat di Indonesia. Lewat slogan ‘Indonesia From The Top Floor’, platform ini menyajikan informasi terkini mengenai proyek mega-struktur ikonik, profil taipan pengembang properti, hingga tren hunian vertikal mewah bagi para investor dan pelaku industri.", img: "/portofolio/assets/preview-indotower.com.jpg", links: [{ label: "Website", type: "web", url: "https://indotower.com" }, { label: "Instagram", type: "ig", url: "https://instagram.com/indotower.id" }] },
+    { title: "lolos.online", desc: "Membangun platform persiapan seleksi online dengan sistem automasi evaluasi dan penilaian berbasis AI. Platform ini melakukan analisa performa personal untuk memberikan rekomendasi belajar yang akurat bagi peserta ujian.", img: "/portofolio/assets/preview-lolos.online.jpg", links: [{ label: "Website", type: "web", url: "http://lolos.online" }] },
     { title: "bettercalljack.lab", desc: "Laboratorium eksperimental di Instagram yang mengeksarasi sinergi antara kreativitas visual dan algoritma media sosial.", img: "/portofolio/assets/preview-bettercalljack.lab.jpg", links: [{ label: "Instagram", type: "ig", url: "https://instagram.com/bettercalljack.lab" }] },
     { title: "Fantasy Spa", desc: "Berhasil mengimplementasikan perbaikan operasional dan performance marketing, yang sukses menaikkan jumlah pengunjung hingga 61% dan mendorong pertumbuhan net profit sebesar 74% dibandingkan bulan sebelumnya.", img: "/portofolio/assets/preview-fantasyspa.jpg", links: [{ label: "Drive Archive", type: "drive", url: "https://drive.google.com/drive/folders/1ZQOfb5t7KB6zJIxm1dZwZ0NIdf4UuO6z?usp=sharing" }] }
   ];
@@ -137,16 +109,9 @@ export default function BlendedPortfolio() {
   return (
     <main className="relative min-h-screen w-full bg-slate-100 font-sans selection:bg-neutral-900 selection:text-white overflow-x-hidden">
       
-      {/* Stealth Kinetic Aura 3D Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <Canvas dpr={[1, 1.5]}>
-          <AdaptiveDpr pixelated />
-          <AdaptiveEvents />
-          <PerspectiveCamera makeDefault position={[0, 0, 10]} fov={45} />
-          <Suspense fallback={null}>
-            <KineticAura />
-          </Suspense>
-        </Canvas>
+      {/* CSS Aura Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <CSSAura />
       </div>
 
       {/* Content Section */}
@@ -155,7 +120,7 @@ export default function BlendedPortfolio() {
         {/* Hero Section */}
         <section className="pt-32 sm:pt-40 pb-24 px-6 max-w-5xl w-full flex flex-col items-center text-center">
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-44 md:h-44 mb-10 rounded-full overflow-hidden border-[4px] border-white shadow-2xl bg-white">
-            <Image src="/portofolio/assets/foto-agung.JPG" alt="Agung Wahyu Riyadi" fill className="object-cover" priority unoptimized />
+            <Image src="/portofolio/assets/foto-agung.JPG" alt="Agung Wahyu Riyadi" fill className="object-cover" priority />
           </motion.div>
 
           <motion.div className="mb-10 px-8 py-2.5 sm:px-10 sm:py-3 rounded-full border border-neutral-200 bg-white/40 backdrop-blur-xl shadow-sm">
